@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>动能右侧交易手册（Momentum Right-Side Playbook）</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <style>
+    :root {
+      --bg: #0b1020;
+      --bg-soft: #151a2c;
+      --bg-softer: #1e2438;
+      --primary: #46c1ff;
+      --accent: #ffb347;
+      --danger: #ff5c7a;
+      --success: #42d392;
+      --text: #f5f7ff;
+      --muted: #9aa4c6;
+      --border: #252a3f;
+      --code-bg: #111624;
+      --shadow-soft: 0 18px 35px rgba(0, 0, 0, 0.5);
+      --radius-lg: 18px;
+      --radius-md: 12px;
+      --radius-pill: 999px;
+      --transition-fast: 0.18s ease-out;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "SF Pro Text",
+        "Segoe UI", sans-serif;
+      background: radial-gradient(circle at top, #1b2340 0, #050814 55%, #02030a 100%);
+      color: var(--text);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a {
+      color: var(--primary);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    .page {
+      max-width: 1120px;
+      margin: 32px auto 64px;
+      padding: 0 16px 40px;
+    }
+
+    header.hero {
+      background: radial-gradient(circle at top left, #263157 0, #131729 45%, #060713 100%);
+      border-radius: 24px;
+      padding: 28px 24px 26px;
+      box-shadow: var(--shadow-soft);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    header.hero::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at 10% 0, rgba(70, 193, 255, 0.18), transparent 60%);
+      opacity: 0.8;
+      pointer-events: none;
+    }
+
+    .hero-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      position: relative;
+      z-index: 1;
+    }
+
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 4px 12px;
+      border-radius: var(--radius-pill);
+      background: rgba(8, 244, 180, 0.08);
+      border: 1px solid rgba(66, 211, 146, 0.7);
+      color: var(--success);
+      font-size: 12px;
+      margin-bottom: 10px;
+    }
+
+    .hero-badge span.dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+      background: var(--success);
+      box-shadow: 0 0 8px rgba(66, 211, 146, 0.85);
+    }
+
+    .hero h1 {
+      font-size: 26px;
+      margin-bottom: 6px;
+      letter-spacing: 0.02em;
+    }
+
+    .hero-subtitle {
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 540px;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+
+    .hero-tag {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      background: rgba(0, 0, 0, 0.2);
+      color: var(--muted);
+    }
+
+    .hero-right {
+      text-align: right;
+      min-width: 160px;
+    }
+
+    .stat-chip {
+      border-radius: var(--radius-lg);
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 10px 12px;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
+    .stat-chip strong {
+      color: var(--accent);
+      font-size: 13px;
+    }
+
+    nav.toc {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    nav.toc a {
+      font-size: 12px;
+      padding: 4px 10px;
+      border-radius: var(--radius-pill);
+      background: rgba(10, 14, 30, 0.9);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      text-decoration: none;
+    }
+
+    nav.toc a:hover {
+      border-color: rgba(70, 193, 255, 0.8);
+    }
+
+    main {
+      margin-top: 24px;
+    }
+
+    section {
+      margin-bottom: 32px;
+    }
+
+    .section-card {
+      background: linear-gradient(135deg, rgba(9, 12, 30, 0.97), rgba(15, 22, 44, 0.97));
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      padding: 18px 18px 20px;
+      box-shadow: 0 14px 25px rgba(0, 0, 0, 0.45);
+    }
+
+    .section-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+
+    .section-header h2 {
+      font-size: 18px;
+      letter-spacing: 0.02em;
+    }
+
+    .section-badge {
+      font-size: 11px;
+      padding: 3px 10px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: var(--muted);
+      background: rgba(0, 0, 0, 0.35);
+      white-space: nowrap;
+    }
+
+    h3 {
+      font-size: 15px;
+      margin: 14px 0 6px;
+    }
+
+    p {
+      font-size: 14px;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    ul {
+      margin-left: 18px;
+      margin-bottom: 6px;
+    }
+
+    li {
+      font-size: 14px;
+      color: var(--muted);
+      margin-bottom: 3px;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+      gap: 12px;
+      align-items: flex-start;
+      margin-top: 6px;
+    }
+
+    .pill-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin: 4px 0 8px;
+    }
+
+    .pill {
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: var(--radius-pill);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--muted);
+    }
+
+    .pill--good {
+      border-color: rgba(66, 211, 146, 0.7);
+      color: var(--success);
+      background: rgba(66, 211, 146, 0.1);
+    }
+
+    .pill--warn {
+      border-color: rgba(255, 188, 80, 0.8);
+      color: var(--accent);
+      background: rgba(255, 188, 80, 0.08);
+    }
+
+    .pill--bad {
+      border-color: rgba(255, 92, 122, 0.85);
+      color: var(--danger);
+      background: rgba(255, 92, 122, 0.08);
+    }
+
+    .chart-card {
+      background: radial-gradient(circle at top, #262f52 0, #121629 55%, #050712 100%);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 10px;
+    }
+
+    .chart-title {
+      font-size: 12px;
+      margin-bottom: 4px;
+      color: var(--muted);
+    }
+
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+
+    .diagram {
+      background: radial-gradient(circle at top, #262d48 0, #111527 55%, #050713 100%);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 8px;
+      margin-top: 4px;
+    }
+
+    .diagram-caption {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .code-block {
+      background: var(--code-bg);
+      border-radius: var(--radius-md);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 8px 10px;
+      font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+        Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 12px;
+      color: var(--muted);
+      overflow-x: auto;
+      margin-top: 6px;
+    }
+
+    footer {
+      margin-top: 28px;
+      font-size: 11px;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    @media (max-width: 768px) {
+      .grid-2 {
+        grid-template-columns: minmax(0, 1fr);
+      }
+      .hero-top {
+        flex-direction: column;
+      }
+      .hero-right {
+        text-align: left;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header class="hero">
+      <div class="hero-top">
+        <div>
+          <div class="hero-badge">
+            <span class="dot"></span> 右侧动能交易 · 专属系统
+          </div>
+          <h1>动能右侧交易手册（Momentum Right-Side Playbook）</h1>
+          <p class="hero-subtitle">
+            通用的动能交易框架 + 你的突破 &amp; 回撤右侧风格定制版。适用于任何股票、任何主题，
+            重点在于<strong>顺势而为、吃趋势中段利润、用结构取代情绪</strong>。
+          </p>
+          <div class="hero-tags">
+            <span class="hero-tag">动能筛选</span>
+            <span class="hero-tag">突破买点</span>
+            <span class="hero-tag">回撤买点</span>
+            <span class="hero-tag">主升浪 / 初升浪</span>
+            <span class="hero-tag">仓位 &amp; 止盈</span>
+          </div>
+        </div>
+        <div class="hero-right">
+          <div class="stat-chip">
+            当前版本：<strong>V1.0</strong><br />
+            适用：情绪高涨、趋势明确的行情阶段
+          </div>
+          <nav class="toc">
+            <a href="#core-idea">核心理念</a>
+            <a href="#screen">动能筛选</a>
+            <a href="#waves">主升浪 vs 初升浪</a>
+            <a href="#breakout">突破模型</a>
+            <a href="#pullback">回撤模型</a>
+            <a href="#position">仓位 & 止盈</a>
+            <a href="#psychology">心理框架</a>
+          </nav>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- 核心理念 -->
+      <section id="core-idea">
+        <div class="section-card">
+          <div class="section-header">
+            <h2>1. 动能交易核心理念</h2>
+            <div class="section-badge">Core Idea</div>
+          </div>
+          <p><strong>右侧交易不是预测，是跟随。</strong></p>
+          <p><strong>右侧交易不是便宜，是强势。</strong></p>
+          <p><strong>右侧交易不是价值，是趋势。</strong></p>
+          <p><strong>右侧交易不是抄底，是顺势上车。</strong></p>
+          <p class="muted">
+            你的目标不是证明自己“买得多低”，而是<strong>高概率地吃到趋势中段的那一大段利润</strong>。
+          </p>
+          <div class="code-block">
+            核心公式：<br />
+            <br />
+            动能交易 = 技术动能 + 叙事动能 + 资金动能<br />
+            右侧优势 = 价格已证明方向 &gt; 主观判断
+          </div>
+        </div>
+      </section>
+
+      <!-- 动能筛选 -->
+      <section id="screen">
+        <div class="section-card">
+          <div class="section-header">
+            <h2>2. 通用动能筛选框架（Momentum Screening）</h2>
+            <div class="section-badge">Technical + Narrative + Flow</div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h3>2.1 技术动能（Technical Momentum）</h3>
+              <p>候选股需至少满足以下 3 条：</p>
+              <ul>
+                <li>股价创新高（52W 高 / 阶段高 / 有效结构突破）</li>
+                <li>多头结构：Higher High + Higher Low</li>
+                <li>成交量明显放大（≥ 20 日均量的 2 倍）</li>
+                <li>多周期共振（1H、4H、1D、1W 同方向）</li>
+                <li>RSI &gt; 60，处于强势区</li>
+                <li>价格运行在关键均线之上（5 / 10 / 20 / 50 日）</li>
+              </ul>
+
+              <h3>2.2 叙事动能（Narrative Momentum）</h3>
+              <p>至少满足 1 条：</p>
+              <ul>
+                <li>所在板块有强烈主题（AI、半导体、云、能源等）</li>
+                <li>行业“单边预期”不断加强（未来空间被市场反复讲）</li>
+                <li>利好是强化长期逻辑，而非一次性短期新闻</li>
+                <li>板块整体强于指数，呈现资金抱团迹象</li>
+              </ul>
+
+              <h3>2.3 资金动能（Flow Momentum）</h3>
+              <p>至少满足 1 条：</p>
+              <ul>
+                <li>主力 / 机构持续净流入</li>
+                <li>相关 ETF 显著放量上行</li>
+                <li>当日主力/大单买入力度明显 &gt; 卖出</li>
+              </ul>
+            </div>
+
+            <div>
+              <div class="chart-card">
+                <div class="chart-title">动能三因子雷达图（技术 / 叙事 / 资金）</div>
+                <canvas id="momentumRadar"></canvas>
+              </div>
+              <p class="diagram-caption">
+                实战中，你可以用自己的主观评分（1–5 分）给候选股打分：技术 + 叙事 + 资金 ≥ 某个阈值时，才进入<strong>右侧观察池</strong>。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 主升浪 vs 初升浪 -->
+      <section id="waves">
+        <div class="section-card">
+          <div class="section-header">
+            <h2>3. 主升浪 vs 初升浪（可视化判断）</h2>
+            <div class="section-badge">Wave Typology</div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h3>3.1 主升浪特征</h3>
+              <ul>
+                <li>巨量突破（≥ 3× 日均量，放量明显）</li>
+                <li>板块联动，多只个股同步强势</li>
+                <li>利好强化长期趋势（如：AI Capex 长期提升）</li>
+                <li>中长期均线多头排列（50 / 100 / 200 日）</li>
+                <li>周线结构也配合向上突破</li>
+              </ul>
+              <div class="pill-list">
+                <span class="pill pill--good">适合：波段 + 趋势持有</span>
+                <span class="pill pill--good">可分批加仓</span>
+              </div>
+
+              <h3>3.2 初升浪特征</h3>
+              <ul>
+                <li>个股先动，板块暂未跟随</li>
+                <li>放量有限（1.5–2×），力度不足</li>
+                <li>新闻较短期、偏事件驱动</li>
+                <li>上方仍有明显中期压力位</li>
+              </ul>
+              <div class="pill-list">
+                <span class="pill pill--warn">适合：快进快出</span>
+                <span class="pill pill--warn">不可抱长期幻想</span>
+              </div>
+            </div>
+
+            <div>
+              <div class="chart-card">
+                <div class="chart-title">主升浪 vs 初升浪 强度对比</div>
+                <canvas id="waveBar"></canvas>
+              </div>
+              <p class="diagram-caption">
+                强度示意：主升浪在成交量、板块联动、长期逻辑这几维度明显高于初升浪。<br />
+                你的策略：<strong>主升浪吃趋势，初升浪吃价差</strong>。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 突破 vs 假突破 -->
+      <section id="breakout">
+        <div class="section-card">
+          <div class="section-header">
+            <h2>4. 突破 & 假突破图示（你的突破模型）</h2>
+            <div class="section-badge">Breakout &amp; Fakeout</div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h3>4.1 有效突破形态</h3>
+              <div class="diagram">
+                <svg viewBox="0 0 260 120">
+                  <!-- 价格线 -->
+                  <polyline
+                    points="10,90 40,80 70,85 100,75 130,78 160,70 190,40 220,28"
+                    fill="none"
+                    stroke="#46c1ff"
+                    stroke-width="2.5"
+                  />
+                  <!-- 压力位 -->
+                  <line
+                    x1="10" y1="65" x2="245" y2="65"
+                    stroke="#ffb347"
+                    stroke-width="1.2"
+                    stroke-dasharray="4 4"
+                  />
+                  <!-- 突破箭头 -->
+                  <line
+                    x1="190" y1="40" x2="210" y2="25"
+                    stroke="#42d392"
+                    stroke-width="2"
+                    marker-end="url(#arrowHead)"
+                  />
+                  <text x="14" y="60" fill="#ffb347" font-size="10">前期压力位</text>
+                  <text x="150" y="34" fill="#42d392" font-size="10">放量突破并站稳</text>
+                  <!-- marker -->
+                  <defs>
+                    <marker id="arrowHead" markerWidth="8" markerHeight="8" refX="0" refY="2" orient="auto">
+                      <polygon points="0,0 0,4 4,2" fill="#42d392" />
+                    </marker>
+                  </defs>
+                </svg>
+              </div>
+              <p class="diagram-caption">
+                有效突破：<strong>放量 + 收盘价在压力位之上 + 后续数根 K 线不快速跌回压力下方</strong>。
+              </p>
+              <ul>
+                <li>可在突破当日分批上车（30% 仓位）</li>
+                <li>也可等待回踩前高/均线再加仓</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3>4.2 假突破形态</h3>
+              <div class="diagram">
+                <svg viewBox="0 0 260 120">
+                  <!-- 价格线：上影后跌回 -->
+                  <polyline
+                    points="10,90 40,80 70,85 100,78 130,82 160,68 190,50 210,70 240,85"
+                    fill="none"
+                    stroke="#ff5c7a"
+                    stroke-width="2.5"
+                  />
+                  <!-- 压力位 -->
+                  <line
+                    x1="10" y1="70" x2="245" y2="70"
+                    stroke="#ffb347"
+                    stroke-width="1.2"
+                    stroke-dasharray="4 4"
+                  />
+                  <text x="14" y="66" fill="#ffb347" font-size="10">前期压力位</text>
+                  <text x="145" y="45" fill="#ff5c7a" font-size="10">突破瞬间但收回压力下方</text>
+                </svg>
+              </div>
+              <p class="diagram-caption">
+                假突破：<strong>上影线长、量能不足、收盘在压力位下方</strong>。<br />
+                你的规则：<span style="color:#ff5c7a;">这种情况下不买，已经买的要考虑减仓/止损。</span>
+              </p>
+              <ul>
+                <li>放弃交易 &gt; 勉强参与</li>
+                <li>右侧交易的首要任务是“避免假突破的大亏”</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 回撤买点模型 -->
+      <section id="pullback">
+        <div class="section-card">
+          <div class="section-header">
+            <h2>5. 回撤买点模型（Pullback Buy Model）</h2>
+            <div class="section-badge">你擅长的右侧回踩上车</div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h3>5.1 合格回撤的特征</h3>
+              <ul>
+                <li>回踩前高（突破位）附近获得支撑</li>
+                <li>回踩中成交量缩小（抛压有限）</li>
+                <li>整体多头结构仍在（Higher Low）</li>
+                <li>板块情绪仍偏多，指数不出现系统性风险</li>
+              </ul>
+              <h3>5.2 不合格回撤（应回避）</h3>
+              <ul>
+                <li>放量下跌式回撤（可能是出货）</li>
+                <li>连续长阴 + 缺乏像样反抽</li>
+                <li>跌破关键均线 &amp; 趋势线</li>
+              </ul>
+            </div>
+
+            <div>
+              <div class="chart-card">
+                <div class="chart-title">右侧回撤买点位置示意</div>
+                <canvas id="pullbackChart"></canvas>
+              </div>
+              <p class="diagram-caption">
+                回撤买点核心思想：<strong>让多头结构先证明“我只是正常呼吸，不是心跳停止”</strong>，
+                再用仓位参与，而不是盲目接飞刀。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 仓位 & 止盈 -->
+      <section id="position">
+        <div class="section-card">
+          <div class="section-header">
+            <h2>6. 仓位管理 & 止盈曲线</h2>
+            <div class="section-badge">Position &amp; Take Profit</div>
+          </div>
+
+          <div class="grid-2">
+            <div>
+              <h3>6.1 仓位管理（右侧专用）</h3>
+              <ul>
+                <li>初始仓位：10–30%</li>
+                <li>确认主升浪：最高可提升到 40–50%</li>
+                <li>右侧<strong>不满仓</strong>，永远留有余地</li>
+                <li>加仓只在：回撤确认、结构未破的情况下进行</li>
+              </ul>
+              <h3>6.2 止盈规则</h3>
+              <ul>
+                <li>趋势止盈：跌破 5 日线减仓，跌破 10 日线再减，20 日线全部离场</li>
+                <li>情绪止盈：RSI &gt; 80、价格严重偏离均线时，分批落袋</li>
+                <li>叙事止盈：主题热度下降、资金轮动到别的板块</li>
+              </ul>
+            </div>
+
+            <div>
+              <div class="chart-card">
+                <div class="chart-title">仓位随趋势发展变化示意图</div>
+                <canvas id="positionChart"></canvas>
+              </div>
+              <p class="diagram-caption">
+                底部启动：轻仓试探 → 突破确认：加到中仓 → 趋势走远：不再加仓，只做<strong>持有 + 止盈</strong>。
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 心理框架 -->
+      <section id="psychology">
+        <div class="section-card">
+          <div class="section-header">
+            <h2>7. 右侧交易心理框架（Mental Framework）</h2>
+            <div class="section-badge">Emotion &amp; Discipline</div>
+          </div>
+
+          <h3>7.1 你需要牢牢记住的 5 句话</h3>
+          <ul>
+            <li>我不追最低价，我只追已被证明的趋势。</li>
+            <li>突破失败就走，这是右侧交易者的生存底线。</li>
+            <li>回撤是多头的呼吸，不是多头的死亡。</li>
+            <li>假突破的大亏，比错过一笔行情更可怕。</li>
+            <li>右侧吃的是“中段利润”，不是“故事的开头和结尾”。</li>
+          </ul>
+
+          <h3>7.2 简化执行用的 Checklist</h3>
+          <div class="code-block">
+            【右侧开仓前 30 秒 Checklist】<br/>
+            1. 动能是否来自「技术 + 叙事 + 资金」三重动能？<br/>
+            2. 这是主升浪还是初升浪？<br/>
+            3. 我是买突破，还是等回撤？<br/>
+            4. 仓位多少？止损在哪里？<br/>
+            5. 如果突破失败，我是否愿意立即止损？<br/>
+          </div>
+        </div>
+      </section>
+
+      <footer>
+        本页面为你的个人动能右侧交易手册静态版，可直接部署到 GitHub Pages 使用。<br />
+        建议：随着你的实战经验增加，逐步在本页面基础上加入自己的注释与真实案例截图。
+      </footer>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      // 1. 动能雷达图
+      const ctxRadar = document.getElementById("momentumRadar");
+      if (ctxRadar) {
+        new Chart(ctxRadar, {
+          type: "radar",
+          data: {
+            labels: ["技术动能", "叙事动能", "资金动能"],
+            datasets: [
+              {
+                label: "理想强趋势标的示意",
+                data: [5, 4, 4],
+                borderColor: "rgba(70, 193, 255, 0.9)",
+                backgroundColor: "rgba(70, 193, 255, 0.25)",
+                borderWidth: 2,
+                pointRadius: 3
+              },
+              {
+                label: "一般题材股示意",
+                data: [3, 2, 2],
+                borderColor: "rgba(154, 164, 198, 0.9)",
+                backgroundColor: "rgba(154, 164, 198, 0.15)",
+                borderWidth: 1.5,
+                pointRadius: 2
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                labels: {
+                  color: "#f5f7ff",
+                  font: { size: 10 }
+                }
+              }
+            },
+            scales: {
+              r: {
+                angleLines: { color: "rgba(255,255,255,0.08)" },
+                grid: { color: "rgba(255,255,255,0.08)" },
+                suggestedMin: 0,
+                suggestedMax: 5,
+                ticks: {
+                  display: false
+                },
+                pointLabels: {
+                  color: "#f5f7ff",
+                  font: { size: 11 }
+                }
+              }
+            }
+          }
+        });
+      }
+
+      // 2. 主升浪 vs 初升浪强度对比图
+      const ctxWave = document.getElementById("waveBar");
+      if (ctxWave) {
+        new Chart(ctxWave, {
+          type: "bar",
+          data: {
+            labels: ["成交量放大", "板块联动", "长期逻辑", "趋势结构"],
+            datasets: [
+              {
+                label: "主升浪",
+                data: [5, 5, 5, 4],
+                backgroundColor: "rgba(70, 193, 255, 0.8)"
+              },
+              {
+                label: "初升浪",
+                data: [3, 2, 2, 3],
+                backgroundColor: "rgba(255, 179, 71, 0.9)"
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                ticks: { color: "#f5f7ff", font: { size: 11 } },
+                grid: { display: false }
+              },
+              y: {
+                ticks: {
+                  color: "#9aa4c6",
+                  stepSize: 1
+                },
+                grid: { color: "rgba(255,255,255,0.08)" },
+                suggestedMin: 0,
+                suggestedMax: 5
+              }
+            },
+            plugins: {
+              legend: {
+                labels: { color: "#f5f7ff", font: { size: 11 } }
+              }
+            }
+          }
+        });
+      }
+
+      // 3. 回撤买点模型（简单示意）
+      const ctxPullback = document.getElementById("pullbackChart");
+      if (ctxPullback) {
+        new Chart(ctxPullback, {
+          type: "line",
+          data: {
+            labels: ["突破前", "突破", "回撤", "确认", "再上行"],
+            datasets: [
+              {
+                label: "价格路径示意",
+                data: [95, 110, 103, 108, 120],
+                borderColor: "rgba(70, 193, 255, 0.95)",
+                backgroundColor: "rgba(70, 193, 255, 0.2)",
+                tension: 0.35,
+                fill: false,
+                pointRadius: [3, 3, 4, 4, 3],
+                pointBackgroundColor: [
+                  "#46c1ff",
+                  "#46c1ff",
+                  "#ffb347",
+                  "#42d392",
+                  "#46c1ff"
+                ]
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                labels: { color: "#f5f7ff", font: { size: 11 } }
+              }
+            },
+            scales: {
+              x: {
+                ticks: { color: "#f5f7ff", font: { size: 11 } },
+                grid: { display: false }
+              },
+              y: {
+                ticks: { color: "#9aa4c6" },
+                grid: { color: "rgba(255,255,255,0.08)" }
+              }
+            }
+          }
+        });
+      }
+
+      // 4. 仓位管理曲线图
+      const ctxPosition = document.getElementById("positionChart");
+      if (ctxPosition) {
+        new Chart(ctxPosition, {
+          type: "line",
+          data: {
+            labels: ["试探期", "突破确认", "趋势展开", "高位震荡"],
+            datasets: [
+              {
+                label: "建议仓位比例（%）",
+                data: [15, 35, 45, 40],
+                borderColor: "rgba(66, 211, 146, 0.95)",
+                backgroundColor: "rgba(66, 211, 146, 0.2)",
+                tension: 0.35,
+                fill: true,
+                pointRadius: 3
+              }
+            ]
+          },
+          options: {
+            responsive: true,
+            plugins: {
+              legend: {
+                labels: { color: "#f5f7ff", font: { size: 11 } }
+              }
+            },
+            scales: {
+              x: {
+                ticks: { color: "#f5f7ff", font: { size: 11 } },
+                grid: { display: false }
+              },
+              y: {
+                ticks: {
+                  color: "#9aa4c6",
+                  callback: (v) => v + "%"
+                },
+                grid: { color: "rgba(255,255,255,0.08)" },
+                suggestedMin: 0,
+                suggestedMax: 60
+              }
+            }
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>
+
