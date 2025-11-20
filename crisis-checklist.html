@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>QQQ 危机建仓节奏小工具</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+        "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #0f172a;
+      color: #111827;
+    }
+    .wrapper {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px 12px;
+    }
+    .card {
+      width: 100%;
+      max-width: 900px;
+      background: #ffffff;
+      border-radius: 14px;
+      padding: 20px 24px 24px;
+      box-shadow: 0 18px 50px rgba(15, 23, 42, 0.45);
+      border: 1px solid #e5e7eb;
+    }
+    .card-header {
+      margin-bottom: 18px;
+    }
+    h1 {
+      margin: 0 0 6px 0;
+      font-size: 20px;
+      color: #111827;
+    }
+    .subtitle {
+      margin: 0;
+      font-size: 13px;
+      color: #6b7280;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 16px;
+      margin-top: 12px;
+    }
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      display: block;
+      margin-bottom: 4px;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    input[type="number"]:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37, 99, 235, 0.25);
+    }
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .checkbox-row input[type="checkbox"] {
+      width: 15px;
+      height: 15px;
+    }
+    .checkbox-label {
+      font-size: 13px;
+      color: #374151;
+    }
+    .btn-row {
+      margin-top: 16px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    button {
+      border: none;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform 0.1s ease, box-shadow 0.1s ease,
+        background-color 0.15s ease;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg, #2563eb, #4f46e5);
+      color: #f9fafb;
+      box-shadow: 0 10px 20px rgba(37, 99, 235, 0.35);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(37, 99, 235, 0.45);
+    }
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #e5e7eb;
+    }
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+    }
+    .badge-soft {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+    .badge-danger {
+      background: #fef2f2;
+      color: #b91c1c;
+    }
+    .badge-success {
+      background: #ecfdf5;
+      color: #15803d;
+    }
+    .badge-warning {
+      background: #fffbeb;
+      color: #b45309;
+    }
+    .result {
+      margin-top: 18px;
+      padding-top: 14px;
+      border-top: 1px dashed #e5e7eb;
+    }
+    .result-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+    .result-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #111827;
+    }
+    .result-main {
+      font-size: 15px;
+      font-weight: 700;
+    }
+    .result-main.safe {
+      color: #15803d;
+    }
+    .result-main.caution {
+      color: #b45309;
+    }
+    .result-main.danger {
+      color: #b91c1c;
+    }
+    .result-main.neutral {
+      color: #1f2937;
+    }
+    .result-text {
+      font-size: 13px;
+      color: #4b5563;
+      margin: 2px 0;
+    }
+    .result-text strong {
+      color: #111827;
+    }
+    .hint {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .footer-note {
+      margin-top: 14px;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    .inline-highlight {
+      background: #fef3c7;
+      border-radius: 4px;
+      padding: 1px 4px;
+    }
+    @media (max-width: 640px) {
+      .card {
+        padding: 16px 14px 18px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrapper">
+    <div class="card">
+      <div class="card-header">
+        <h1>QQQ 危机建仓节奏小工具</h1>
+        <p class="subtitle">
+          用于 2025–2026 信用风险场景下，帮助你克制 FOMO，按赔率而非情绪执行加仓计划。
+        </p>
+      </div>
+
+      <!-- 输入区 -->
+      <div class="grid">
+        <div>
+          <label for="recentHigh">QQQ 最近高点价格</label>
+          <input
+            type="number"
+            id="recentHigh"
+            value="613.0"
+            step="0.1"
+            min="0"
+          />
+          <p class="hint">例如：最近一段时间你认为的局部顶部，如 613</p>
+        </div>
+        <div>
+          <label for="currentPrice">QQQ 当前价格</label>
+          <input
+            type="number"
+            id="currentPrice"
+            value="602.0"
+            step="0.1"
+            min="0"
+          />
+          <p class="hint">盘中或收盘时 QQQ 的最新价格</p>
+        </div>
+        <div>
+          <label for="vix">当前 VIX 指数</label>
+          <input
+            type="number"
+            id="vix"
+            value="19.8"
+            step="0.1"
+            min="0"
+          />
+          <p class="hint">例如：19.8，16~17 通常意味着隐波较便宜</p>
+        </div>
+      </div>
+
+      <div class="checkbox-row">
+        <input type="checkbox" id="creditEvent" />
+        <label for="creditEvent" class="checkbox-label">
+          今天是否出现明显「信用事件」
+          （如私募信贷/BDC/CLO/区域银行爆雷、暂停赎回等）？
+        </label>
+      </div>
+
+      <!-- 按钮 -->
+      <div class="btn-row">
+        <button class="btn-primary" onclick="evaluatePlan()">
+          ▶ 计算今日建仓建议
+        </button>
+        <button class="btn-secondary" onclick="resetForm()">
+          重置输入
+        </button>
+        <span class="badge badge-soft">
+          逻辑规则：高点跌幅 + VIX + 信用事件 三因素
+        </span>
+      </div>
+
+      <!-- 结果 -->
+      <div class="result" id="resultArea" style="display: none;">
+        <div class="result-row">
+          <span class="result-title">今日建议：</span>
+          <span id="actionText" class="result-main neutral">—</span>
+        </div>
+        <p class="result-text" id="dropInfo"></p>
+        <p class="result-text" id="vixInfo"></p>
+        <p class="result-text" id="creditInfo"></p>
+        <p class="result-text" id="detailInfo"></p>
+        <p class="footer-note">
+          提示：本工具仅用于帮你对齐事先制定的危机策略节奏，避免情绪化追涨杀跌，
+          并不构成任何投资建议。所有操作仍需你独立判断与承担风险。
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function formatPercent(x) {
+      return x.toFixed(2) + "%";
+    }
+
+    function evaluatePlan() {
+      const recentHigh = parseFloat(
+        document.getElementById("recentHigh").value
+      );
+      const currentPrice = parseFloat(
+        document.getElementById("currentPrice").value
+      );
+      const vix = parseFloat(document.getElementById("vix").value);
+      const hasCreditEvent =
+        document.getElementById("creditEvent").checked || false;
+
+      const resultArea = document.getElementById("resultArea");
+      const actionText = document.getElementById("actionText");
+      const dropInfo = document.getElementById("dropInfo");
+      const vixInfo = document.getElementById("vixInfo");
+      const creditInfo = document.getElementById("creditInfo");
+      const detailInfo = document.getElementById("detailInfo");
+
+      actionText.className = "result-main neutral";
+
+      if (
+        !recentHigh ||
+        !currentPrice ||
+        isNaN(recentHigh) ||
+        isNaN(currentPrice) ||
+        recentHigh <= 0
+      ) {
+        resultArea.style.display = "block";
+        actionText.textContent = "请输入有效的 QQQ 价格数据";
+        actionText.className = "result-main danger";
+        dropInfo.textContent = "";
+        vixInfo.textContent = "";
+        creditInfo.textContent = "";
+        detailInfo.textContent =
+          "最近高点与当前价格必须为正数，且最近高点不能为 0。";
+        return;
+      }
+
+      const drop = ((recentHigh - currentPrice) / recentHigh) * 100;
+      const clampedDrop = Math.max(drop, -5); // 如果创新高，允许为负但不太大
+
+      // 描述跌幅
+      let dropDesc = "";
+      if (clampedDrop < 0) {
+        dropDesc = "当前价格高于你设定的最近高点（视为新高）。";
+      } else if (clampedDrop < 3) {
+        dropDesc = "属于 -0% ～ -3% 区间：多为噪音或短期回吐。";
+      } else if (clampedDrop < 8) {
+        dropDesc = "属于 -3% ～ -8% 区间：正常回调或技术性调整。";
+      } else if (clampedDrop < 12) {
+        dropDesc = "属于 -8% ～ -12% 区间：进入较深回调区域。";
+      } else if (clampedDrop < 18) {
+        dropDesc = "属于 -12% ～ -18% 区间：可能是信用压力前兆区域。";
+      } else {
+        dropDesc = "跌幅超过 -18%：已接近或处于系统性 panic 区间。";
+      }
+
+      dropInfo.innerHTML =
+        "从最近高点 " +
+        recentHigh.toFixed(2) +
+        " 跌到当前 " +
+        currentPrice.toFixed(2) +
+        "，跌幅约 <strong>" +
+        formatPercent(clampedDrop) +
+        "</strong>。" +
+        " " +
+        dropDesc;
+
+      // 描述 VIX
+      let vixDesc = "";
+      if (isNaN(vix)) {
+        vixDesc = "当前未输入 VIX，无法评估隐含波动率便宜与否。";
+      } else if (vix < 16) {
+        vixDesc =
+          "VIX 低于 16：隐含波动率极便宜，属于少见的“错误定价”区间。";
+      } else if (vix < 18) {
+        vixDesc =
+          "VIX 处于 16～18：隐含波动率偏低，适合考虑布局远期 Put。";
+      } else if (vix < 22) {
+        vixDesc = "VIX 处于 18～22：中等水平，Put 不算便宜也不算特别贵。";
+      } else {
+        vixDesc =
+          "VIX 高于 22：隐含波动率偏贵，Put 保费昂贵，追空风险较大。";
+      }
+      vixInfo.innerHTML =
+        "当前 VIX ≈ <strong>" +
+        (isNaN(vix) ? "—" : vix.toFixed(1)) +
+        "</strong>。" +
+        " " +
+        vixDesc;
+
+      // 信用事件描述
+      if (hasCreditEvent) {
+        creditInfo.innerHTML =
+          '今天你勾选了：<span class="inline-highlight">出现明显信用事件</span>（私募信贷 / BDC / CLO / 银行爆雷等）。';
+      } else {
+        creditInfo.textContent =
+          "今天未勾选明显信用事件：默认按“无重大信用爆雷当日”的情景处理。";
+      }
+
+      // 决策逻辑
+      let action = "";
+      let tone = "neutral";
+      let detail = "";
+
+      // 若有信用事件，优先按“不能追空当日”的原则处理
+      if (hasCreditEvent) {
+        if (clampedDrop < 8) {
+          action = "不加仓：信用事件刚出现，跌幅不深，当日不追空。";
+          tone = "danger";
+          detail =
+            "出现信用事件但指数跌幅仍不深，通常代表市场正在 price-in 事件本身，" +
+            "但 Put 会因为恐慌情绪变得很贵。此时贸然加仓，容易买在“最贵的保险”上。" +
+            "更合理的做法是：先观察 1～3 天，等待一次技术性反弹后，再在隐波回落时加仓。";
+        } else if (clampedDrop < 18) {
+          action = "不加仓：信用+中度下跌，等待后续反弹再考虑加仓。";
+          tone = "danger";
+          detail =
+            "信用事件叠加 -8%～-18% 区间的下跌意味着市场已经进入“风险重新定价阶段”。" +
+            "此时 Put 的隐含波动率通常非常高。经验上，不在 panic 或半 panic 当日加仓，" +
+            "而是等未来几天技术性反弹与 VIX 回落，再按预案加仓更划算。";
+        } else {
+          action = "严格不加仓：进入系统性 panic，当日只观察不交易。";
+          tone = "danger";
+          detail =
+            "跌幅超过 -18% 且伴随信用事件，往往是系统性 panic 的标志。此时任何追空行为" +
+            "都面临极高的反转风险。更专业的做法是：用已有仓位承受波动，等待未来 5～10% 反弹，" +
+            "在 panic 之后的冷静期再重新评估是否需要增减仓位。";
+        }
+      } else {
+        // 无信用事件：按跌幅 + VIX 正常处理
+        if (clampedDrop < 3) {
+          action = "不加仓：属于噪音/假下跌区间。";
+          tone = "danger";
+          detail =
+            "从最近高点跌幅不足 3%，更多是短期波动或事件性回吐。此区域最容易诱发 FOMO 式追空，" +
+            "但从赔率角度看并不适合加仓。保持耐心，让市场继续走出方向，再考虑执行预案。";
+        } else if (clampedDrop < 8) {
+          action = "观望为主：正常回调，无需急于加仓。";
+          tone = "caution";
+          if (!isNaN(vix) && vix <= 18) {
+            detail =
+              "跌幅处于 -3%～-8% 正常回调区间，但 VIX 偏低，说明市场并未真正恐慌。此时可以" +
+              "开始更密切观察、规划潜在加仓点，但不必急于在今天执行。更理想的加仓时机通常是：VIX 接近 16～17，" +
+              "或者指数出现一次更明显的错误乐观反弹。";
+          } else {
+            detail =
+              "跌幅处于 -3%～-8%，属于可接受的技术性回调。当前 VIX 并不算便宜，Put 性价比一般，" +
+              "更合适的做法是：继续等待大盘要么反弹到更高位置（例如重新接近前高），要么进一步下探接近 -8%～-12% 区间。";
+          }
+        } else if (clampedDrop < 12) {
+          if (!isNaN(vix) && vix <= 20) {
+            action = "可以小仓加一点：进入较深回调区间。";
+            tone = "caution";
+            detail =
+              "跌幅已达 -8%～-12%，开始接近较深回调区域，若 VIX 尚在 20 以下，则 Put 尚未被完全抬价。" +
+              "根据你的总体计划，可以考虑用目标总仓位的 10%～20% 做一次试探性加仓，但仍需保留足够子弹" +
+              "给更深的信用压力阶段。";
+          } else {
+            action = "暂不加仓：等待 VIX 回落或更清晰的信用信号。";
+            tone = "danger";
+            detail =
+              "虽然跌幅超过 -8%，但 VIX 已经较高，说明 Put 保费昂贵。此时加仓会显著降低整体赔率，" +
+              "更专业的方式是：等待未来几日技术反弹，让 VIX 回落，再在更低隐波水平下执行加仓计划。";
+          }
+        } else if (clampedDrop < 18) {
+          if (!isNaN(vix) && vix <= 22) {
+            action = "进入信用前兆区：考虑中等规模加仓，但不梭哈。";
+            tone = "caution";
+            detail =
+              "跌幅 -12%～-18% 常出现在“信用压力前兆阶段”，市场开始从纯估值调整过渡到对违约风险、" +
+              "融资环境的重新定价。如果 VIX 不算极端，且你观察到的基本面/信贷信号与此前剧本吻合，" +
+              "可以考虑用目标仓位的 30%～40% 在这一带逐步加仓。但需避免在单一日内一次性打满所有子弹。";
+          } else {
+            action = "谨慎观望：接近危机区但 Put 已经很贵，等反弹。";
+            tone = "danger";
+            detail =
+              "跌幅已深且 VIX 较高，这是“危机开始被认真定价”的区域。尽管中长期看空逻辑仍成立，" +
+              "但从性价比出发，今天通常不是最好的加仓日。更优做法是：让市场完成这一轮恐慌，" +
+              "等一次有力度的反弹与隐波回落，再按既定比例加仓。";
+          }
+        } else {
+          action = "不加仓：系统性 panic，当日避免追空，等待反弹。";
+          tone = "danger";
+          detail =
+            "跌幅超过 -18%，通常属于系统性 panic 或接近 panic 的阶段。此时 Put 极度昂贵，" +
+            "且随时可能出现 5% 以上的技术性反弹。专业的尾部风险交易者一般不会在 panic 当日追空，" +
+            "而是依赖已有仓位赚取收益，并等待之后的反弹期重新评估是否有必要增加或减轻仓位。";
+        }
+      }
+
+      // 额外标记：黄金隐波区（VIX 16～17 & 跌幅 < 4%）
+      if (!hasCreditEvent && !isNaN(vix) && vix >= 16 && vix <= 17.2 && clampedDrop <= 4) {
+        detail +=
+          " 此外，当前 VIX 处于 16～17 左右且指数跌幅有限，" +
+          "这通常意味着市场情绪偏乐观、尾部风险被低估，" +
+          "属于相对不错的远期 Put“隐波性价比”区间，可作为你未来加仓的重点观察窗口。";
+      }
+
+      resultArea.style.display = "block";
+      actionText.textContent = action;
+      actionText.className = "result-main " + tone;
+      detailInfo.textContent = detail;
+    }
+
+    function resetForm() {
+      document.getElementById("recentHigh").value = "613.0";
+      document.getElementById("currentPrice").value = "602.0";
+      document.getElementById("vix").value = "19.8";
+      document.getElementById("creditEvent").checked = false;
+
+      const resultArea = document.getElementById("resultArea");
+      resultArea.style.display = "none";
+    }
+  </script>
+</body>
+</html>
+
