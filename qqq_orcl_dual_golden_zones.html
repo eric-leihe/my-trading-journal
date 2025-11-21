@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <title>QQQ / ORCL 危机加仓决策小工具（双黄金区版）</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont,"Segoe UI",Roboto,
+        "PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;
+      background: #020617;
+      color: #0f172a;
+    }
+    .page {
+      min-height: 100vh;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 24px 12px 32px;
+    }
+    .card {
+      width: 100%;
+      max-width: 1100px;
+      background: #f9fafb;
+      border-radius: 18px;
+      padding: 22px 24px 26px;
+      box-shadow: 0 24px 70px rgba(15,23,42,0.6);
+      border: 1px solid #e5e7eb;
+    }
+    header {
+      border-bottom: 1px solid #e5e7eb;
+      padding-bottom: 12px;
+      margin-bottom: 14px;
+    }
+    header h1 {
+      margin: 0 0 6px 0;
+      font-size: 22px;
+      color: #0f172a;
+    }
+    header p {
+      margin: 0;
+      font-size: 13px;
+      color: #6b7280;
+    }
+    .tagline {
+      margin-top: 4px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .inline-highlight {
+      background: #fef3c7;
+      border-radius: 4px;
+      padding: 0 4px;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit,minmax(240px,1fr));
+      gap: 14px;
+      margin-top: 10px;
+    }
+    label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+      display: block;
+      margin-bottom: 4px;
+    }
+    input[type="number"] {
+      width: 100%;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid #d1d5db;
+      font-size: 14px;
+      outline: none;
+      transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    input[type="number"]:focus {
+      border-color: #2563eb;
+      box-shadow: 0 0 0 1px rgba(37,99,235,0.25);
+    }
+    .hint {
+      margin-top: 3px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+    .btn-row {
+      margin-top: 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+    button {
+      border: none;
+      padding: 8px 18px;
+      border-radius: 999px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: transform .1s ease, box-shadow .1s ease,
+        background-color .15s ease;
+    }
+    .btn-primary {
+      background: linear-gradient(135deg,#2563eb,#4f46e5);
+      color: #f9fafb;
+      box-shadow: 0 10px 22px rgba(37,99,235,0.4);
+    }
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 28px rgba(37,99,235,0.5);
+    }
+    .btn-secondary {
+      background: #f3f4f6;
+      color: #374151;
+      border: 1px solid #e5e7eb;
+    }
+    .btn-secondary:hover {
+      background: #e5e7eb;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 3px 8px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.03em;
+    }
+    .badge-soft {
+      background: #eff6ff;
+      color: #1d4ed8;
+    }
+
+    .result-section {
+      margin-top: 16px;
+      padding-top: 14px;
+      border-top: 1px dashed #e5e7eb;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin: 0 0 6px 0;
+      color: #111827;
+    }
+    .result-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 4px;
+    }
+    .result-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #374151;
+    }
+    .result-main {
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .q-strong { color: #b91c1c; }
+    .q-medium { color: #b45309; }
+    .q-light { color: #2563eb; }
+    .q-none { color: #4b5563; }
+    .result-text {
+      font-size: 13px;
+      color: #4b5563;
+      margin: 2px 0 6px;
+    }
+
+    .zones {
+      margin-top: 14px;
+      font-size: 12px;
+      color: #6b7280;
+    }
+    .zones h3 {
+      font-size: 13px;
+      margin: 0 0 4px 0;
+      color: #111827;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 4px;
+      font-size: 12px;
+    }
+    th, td {
+      border: 1px solid #e5e7eb;
+      padding: 4px 6px;
+      text-align: left;
+    }
+    th {
+      background: #eef2ff;
+      color: #1f2937;
+      font-weight: 600;
+    }
+    .tag {
+      display: inline-block;
+      padding: 1px 6px;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 600;
+    }
+    .tag-strong { background:#fee2e2;color:#b91c1c; }
+    .tag-medium { background:#fffbeb;color:#92400e; }
+    .tag-light { background:#ecfeff;color:#0e7490; }
+    .tag-none { background:#f3f4f6;color:#4b5563; }
+
+    footer {
+      margin-top: 14px;
+      font-size: 11px;
+      color: #9ca3af;
+    }
+    @media (max-width: 720px) {
+      .card { padding: 18px 14px 22px; }
+      header h1 { font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="card">
+      <header>
+        <h1>QQQ / ORCL 危机加仓决策小工具（双黄金区版）</h1>
+        <p>结合价格区间 + VIX + 你的宏观空头剧本，给出「今天要不要加仓」的定性建议。</p>
+        <p class="tagline">
+          核心：<span class="inline-highlight">第一黄金区 = 612–615（News Failure 高点）；第二黄金区 = 625–637（历史高位附近）。</span>
+        </p>
+      </header>
+
+      <!-- 输入区 -->
+      <div class="grid">
+        <div>
+          <label for="qqqPrice">QQQ 当前价格</label>
+          <input type="number" id="qqqPrice" value="591.0" step="0.1" min="0" />
+          <p class="hint">例如：今天盘中或收盘 QQQ 价格，如 591.0</p>
+        </div>
+        <div>
+          <label for="vix">当前 VIX</label>
+          <input type="number" id="vix" value="24.0" step="0.1" min="0" />
+          <p class="hint">例如：23.9，VIX &lt; 19 通常意味着远期 Put 相对便宜</p>
+        </div>
+        <div>
+          <label for="orclPrice">ORCL 当前价格</label>
+          <input type="number" id="orclPrice" value="118.0" step="0.1" min="0" />
+          <p class="hint">用于判断 ORCL 2026/06 150P 是否值得加仓</p>
+        </div>
+      </div>
+
+      <div class="btn-row">
+        <button class="btn-primary" onclick="evaluate()">
+          ▶ 计算今日加仓建议
+        </button>
+        <button class="btn-secondary" onclick="resetForm()">
+          重置输入
+        </button>
+        <span class="badge badge-soft">规则：双黄金区 + VIX 门槛 + 不在恐慌日追空</span>
+      </div>
+
+      <!-- 结果展示 -->
+      <div id="result" class="result-section" style="display:none;">
+        <div class="section-title">今日综合结论</div>
+        <div class="result-text" id="summary"></div>
+
+        <div class="section-title" style="margin-top:10px;">QQQ 远期 Put（2026/12 450P / 500P）</div>
+        <div class="result-row">
+          <span class="result-label">QQQ 操作建议：</span>
+          <span id="qqqAction" class="result-main q-none">—</span>
+        </div>
+        <p class="result-text" id="qqqReason"></p>
+
+        <div class="section-title" style="margin-top:8px;">ORCL 远期 Put（2026/06 150P）</div>
+        <div class="result-row">
+          <span class="result-label">ORCL 操作建议：</span>
+          <span id="orclAction" class="result-main q-none">—</span>
+        </div>
+        <p class="result-text" id="orclReason"></p>
+
+        <div class="zones">
+          <h3>参考区间（双黄金区版）</h3>
+          <table>
+            <thead>
+              <tr>
+                <th>标的</th>
+                <th>价格区间</th>
+                <th>默认动作</th>
+                <th>备注</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>QQQ</td>
+                <td>612–615</td>
+                <td><span class="tag tag-medium">第一黄金区</span></td>
+                <td>News Failure 高点，建议加 20–40% 计划仓位（VIX 低时）。</td>
+              </tr>
+              <tr>
+                <td>QQQ</td>
+                <td>625–637</td>
+                <td><span class="tag tag-strong">第二黄金区</span></td>
+                <td>历史高位附近，VIX 低时可加 40–60% 核心仓位。</td>
+              </tr>
+              <tr>
+                <td>QQQ</td>
+                <td>605–612 / 615–625</td>
+                <td><span class="tag tag-medium">中等加仓</span></td>
+                <td>反弹区，可视为通往黄金区的预备位，适合 20–30% 试探。</td>
+              </tr>
+              <tr>
+                <td>QQQ</td>
+                <td>585–605</td>
+                <td><span class="tag tag-none">不加仓</span></td>
+                <td>震荡区，方向与隐波都不极端，容易情绪化追空。</td>
+              </tr>
+              <tr>
+                <td>QQQ</td>
+                <td>560–580</td>
+                <td><span class="tag tag-light">小仓（反弹日）</span></td>
+                <td>深跌后反弹时才少量加，不在暴跌当天买。</td>
+              </tr>
+              <tr>
+                <td>QQQ</td>
+                <td>530–560</td>
+                <td><span class="tag tag-medium">危机区（反弹加）</span></td>
+                <td>系统性压力区，只在技术反弹 + VIX 回落时再考虑重锤。</td>
+              </tr>
+              <tr>
+                <td>ORCL</td>
+                <td>124–134</td>
+                <td><span class="tag tag-strong">强加仓</span></td>
+                <td>AI FOMO 高位、VIX 低时的理想建仓区。</td>
+              </tr>
+              <tr>
+                <td>ORCL</td>
+                <td>135–145</td>
+                <td><span class="tag tag-medium">中等加仓</span></td>
+                <td>估值更贵，可建 20–30% 计划仓位。</td>
+              </tr>
+              <tr>
+                <td>ORCL</td>
+                <td>116–124</td>
+                <td><span class="tag tag-none">不加仓</span></td>
+                <td>Put 保费偏贵，等反弹和 VIX 回落。</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <footer>
+          本工具用于帮助你按既定危机剧本、在双黄金区和低隐波环境下有节奏地加仓，
+          约束情绪，不构成任何投资建议。实际操作仍需结合你的仓位规模、资金状况与风险承受能力。
+        </footer>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function evaluateQQQ(qqq, vix) {
+      if (isNaN(qqq) || qqq <= 0) {
+        return {
+          action: "请输入有效的 QQQ 价格",
+          level: "none",
+          reason: "QQQ 当前价格必须为正数。"
+        };
+      }
+      if (isNaN(vix) || vix <= 0) {
+        return {
+          action: "请输入有效的 VIX 数值",
+          level: "none",
+          reason: "VIX 用于判断 Put 保费是否昂贵，没有 VIX 无法给出可靠建议。"
+        };
+      }
+
+      // 高 VIX：不追空
+      if (vix > 23) {
+        return {
+          action: "不加仓：VIX 偏高，Put 保费昂贵，等待情绪降温。",
+          level: "none",
+          reason:
+            "当前 VIX ≈ " + vix.toFixed(1) +
+            "，处于恐慌偏高区间。此时加远期 Put，保费会被恐慌情绪严重抬高。" +
+            "根据你的剧本，应在 VIX 回落到 20 以下、甚至接近 18～19 时，再考虑加仓。"
+        };
+      }
+
+      const lowIV = vix <= 19;
+      const midIV = vix > 19 && vix <= 21;
+
+      // 第二黄金区：625–637 & 低 VIX → 强加仓（40–60%）
+      if (qqq >= 625 && qqq <= 637 && lowIV) {
+        return {
+          action: "强加仓（第二黄金区）：可加 40–60% 计划仓位。",
+          level: "strong",
+          reason:
+            "QQQ 位于 " + qqq.toFixed(1) +
+            "，处在 625–637 的历史高位附近，同时 VIX ≈ " + vix.toFixed(1) +
+            "，隐含波动率偏低。方向上接近历史顶、隐波又便宜，" +
+            "远期 Put（2026/12 450P / 500P）的赔率在这里最优，适合执行第二批重仓布局。"
+        };
+      }
+
+      // 第一黄金区：612–615 & 低 VIX → 加 20–40%
+      if (qqq >= 612 && qqq <= 615 && lowIV) {
+        return {
+          action: "中等偏强加仓（第一黄金区）：可加 20–40% 计划仓位。",
+          level: "medium",
+          reason:
+            "QQQ 当前约 " + qqq.toFixed(1) +
+            "，处于 612–615 区间，这是 NVDA 利好冲高反转形成的 News Failure 高点附近。" +
+            "在 VIX ≈ " + vix.toFixed(1) + " 的低隐波环境下，这一带属于短周期情绪极限，" +
+            "适合加 20–40% 危机仓位，同时为潜在再冲击 625–637 保留子弹。"
+        };
+      }
+
+      // 预备区：605–612 / 615–625 且 VIX 不高 → 中等加仓（20–30%）
+      if (((qqq >= 605 && qqq < 612) || (qqq > 615 && qqq < 625)) && vix <= 21) {
+        return {
+          action: "中等加仓：作为通往黄金区的预备位，可加 20–30%。",
+          level: "medium",
+          reason:
+            "QQQ 当前约 " + qqq.toFixed(1) +
+            "，处于 605–612 或 615–625 的反弹区间，接近双黄金区但尚未触碰关键价位。" +
+            "在 VIX ≈ " + vix.toFixed(1) + " 的环境下，可以视为为第一/第二黄金区做预埋，" +
+            "加 20–30% 计划仓位，同时保留更多筹码给真正进入 612–615 或 625–637 时。"
+        };
+      }
+
+      // 不加仓的震荡区：585–605
+      if (qqq >= 585 && qqq < 605) {
+        return {
+          action: "不加仓：震荡区间，容易情绪化追空。",
+          level: "none",
+          reason:
+            "QQQ 在 " + qqq.toFixed(1) +
+            "，处于 585–605 的中性震荡区间。这里既谈不上极端高估，也未进入深度回调，" +
+            "而 VIX 尚未跌入特别便宜的区域。在这里加仓容易被短期波动和 Theta 消耗，不符合高赔率建仓原则。"
+        };
+      }
+
+      // 深度回调区：560–580，只在反弹日少量布局
+      if (qqq >= 560 && qqq < 585) {
+        return {
+          action: "仅在反弹日小仓加：下跌当天不要追空。",
+          level: "light",
+          reason:
+            "QQQ 已从高点有了较明显回调（当前约 " + qqq.toFixed(1) +
+            "），处于 560–580 区间。这里通常代表市场开始 price-in 更真实的风险，" +
+            "但 VIX 往往偏高。若今天是连续下跌日，不宜加仓；" +
+            "更合理的方式是等待未来 1–3 天出现 3% 左右的技术性反弹，在反弹 + VIX 回落的那一天小仓加 Put。"
+        };
+      }
+
+      // 危机确认区：530–560，只在暴跌后的反弹日重仓
+      if (qqq >= 530 && qqq < 560) {
+        return {
+          action: "危机确认区：只在强反弹日考虑更大仓位。",
+          level: "medium",
+          reason:
+            "QQQ 跌到约 " + qqq.toFixed(1) +
+            "，已经接近 530–560 的“危机确认区”。通常这意味着信用风险开始被系统性定价，" +
+            "VIX 可能已经显著升高。这里不适合在暴跌当天追空，而是要在之后 5–10% 的反弹窗口、" +
+            "配合 VIX 明显回落时，再分批加仓重锤。"
+        };
+      }
+
+      // 价格非常高，但不在设定区间 → 更谨慎
+      if (qqq > 637) {
+        return {
+          action: "谨慎观望：价格已高于设定区间，等待 VIX 更低再考虑。",
+          level: "none",
+          reason:
+            "QQQ 已经高于 637，反弹极端，但当前 VIX ≈ " + vix.toFixed(1) +
+            "。若隐波未继续下探到更低水平（例如 17 附近），" +
+            "在此价位重仓加 Put 仍然可能损失部分赔率，建议更谨慎观望。"
+        };
+      }
+
+      // 其余更低位置：主要任务是利用已有仓位，而不是贸然再加
+      if (qqq < 530) {
+        return {
+          action: "不追空：主要任务是管理已有仓位，等待反弹再调仓。",
+          level: "none",
+          reason:
+            "QQQ 已跌破 530，处于极端弱势区域。此时 Put 保费通常非常昂贵，" +
+            "再加仓会显著稀释整体赔率。更专业的做法是持有既有危机仓位，" +
+            "等待未来较大幅度的技术反弹，再考虑择机减仓或滚动到更远期/更 OTM 的合约。"
+        };
+      }
+
+      // 默认情况：中性观望
+      return {
+        action: "观望：等待价格与 VIX 走到更极端的组合再行动。",
+        level: "none",
+        reason:
+          "当前 QQQ ≈ " + qqq.toFixed(1) +
+          "，VIX ≈ " + vix.toFixed(1) +
+          "，尚未形成你预设的“双黄金区 + 低 VIX”或“深跌 + 反弹”的理想建仓状态。" +
+          "在这种中性环境下，观望比贸然加仓更有利于长期赔率。"
+      };
+    }
+
+    function evaluateORCL(orcl, vix) {
+      if (isNaN(orcl) || orcl <= 0) {
+        return {
+          action: "请输入有效的 ORCL 价格",
+          level: "none",
+          reason: "ORCL 当前价格必须为正数。"
+        };
+      }
+      if (isNaN(vix) || vix <= 0) {
+        return {
+          action: "暂不评估 ORCL：缺少 VIX 信息。",
+          level: "none",
+          reason:
+            "ORCL Put 的性价比同样受整体隐含波动率环境影响，没有 VIX 无法判断保费是否合理。"
+        };
+      }
+
+      // 高 VIX：不建议主动加 ORCL Put
+      if (vix > 23) {
+        return {
+          action: "不加仓：VIX 偏高，ORCL Put 同样保费昂贵。",
+          level: "none",
+          reason:
+            "当前 VIX ≈ " + vix.toFixed(1) +
+            "，代表整体市场隐含波动率已被恐慌情绪明显抬高。ORCL 远期 Put 的保险成本同样偏贵，" +
+            "根据你“高位 + 低隐波卖反弹”的大框架，现在不是新开 ORCL Put 仓位的好时机。"
+        };
+      }
+
+      const lowIV = vix <= 19;
+
+      // 最佳区：124–134，且 VIX 较低
+      if (orcl >= 124 && orcl <= 134 && lowIV) {
+        return {
+          action: "强加仓：ORCL 远期 Put 的理想建仓区。",
+          level: "strong",
+          reason:
+            "ORCL 当前约 " + orcl.toFixed(1) +
+            "，处于 124–134 的反弹高位区间，同时 VIX ≈ " + vix.toFixed(1) +
+            "，整体隐含波动率偏低。这里通常对应 AI 情绪再度升温、市场对高杠杆 AI CAPEX 风险定价不足，" +
+            "非常适合分批建立 ORCL 2026/06 150P 的核心仓位。"
+        };
+      }
+
+      // 次佳区：135–145（价格更贵，但方向更极端）
+      if (orcl > 134 && orcl <= 145 && vix <= 20.5) {
+        return {
+          action: "中等加仓：可投入 20–30% 计划仓位。",
+          level: "medium",
+          reason:
+            "ORCL 已被推升至 " + orcl.toFixed(1) +
+            "，进入 135–145 的高位区间，尽管略高于理想价带，但在 VIX ≈ " + vix.toFixed(1) +
+            " 的环境下，做空这种高杠杆、高 AI CAPEX 的标的仍然有不错赔率。" +
+            "建议在此区间内考虑投入约 20–30% 的 ORCL Put 目标仓位，为更极致高点保留余地。"
+        };
+      }
+
+      // 禁区：116–124，不加
+      if (orcl >= 116 && orcl < 124) {
+        return {
+          action: "不加仓：ORCL 处于不利性价比区间。",
+          level: "none",
+          reason:
+            "ORCL 当前约 " + orcl.toFixed(1) +
+            "，处在 116–124 区间，这通常对应“前高下方的震荡区”。这里 Put 保费并不便宜，" +
+            "而下行空间和时间价值的性价比一般。根据你的计划，应等待 ORCL 再度被情绪推高（124 以上），" +
+            "或出现更极端的高位 FOMO，再来考虑加仓。"
+        };
+      }
+
+      // 若明显高于 145：仅观察
+      if (orcl > 145 && lowIV) {
+        return {
+          action: "谨慎加仓：价格极高但需分段入场。",
+          level: "medium",
+          reason:
+            "ORCL 已经被推到 " + orcl.toFixed(1) +
+            " 的极端高位，同时 VIX 仍然不高，说明市场对 ORCL 的 AI 故事极度乐观，" +
+            "而对其杠杆与利率敏感度定价不足。可以考虑分段小仓布局 Put，但应避免一次性重仓，" +
+            "以防继续被情绪短期推高。"
+        };
+      }
+
+      // 若明显低于 116：等反弹
+      if (orcl < 116) {
+        return {
+          action: "不加仓：等待 ORCL 反弹到更有利的做空区间。",
+          level: "none",
+          reason:
+            "ORCL 当前约 " + orcl.toFixed(1) +
+            "，已经显著低于 116。此时做空性价比下降，Put 保费可能较高且下行空间有限。" +
+            "更好的策略是利用既有危机仓位，等待未来随指数反弹、AI 情绪回暖时 ORCL 被再次推高，" +
+            "再在 124 以上区域考虑重新加仓 Put。"
+        };
+      }
+
+      // 其他中性情况
+      return {
+        action: "观望：ORCL 尚未进入你设定的理想加仓区。",
+        level: "none",
+        reason:
+          "当前 ORCL ≈ " + orcl.toFixed(1) +
+          "，VIX ≈ " + vix.toFixed(1) +
+          "，与 124–145 理想高位区和 116 以下的极弱区都存在一定距离。" +
+          "在这种中性区间，不急于加仓更有利于整体赔率。"
+      };
+    }
+
+    function evaluate() {
+      const qqq = parseFloat(document.getElementById("qqqPrice").value);
+      const vix = parseFloat(document.getElementById("vix").value);
+      const orcl = parseFloat(document.getElementById("orclPrice").value);
+
+      const qRes = evaluateQQQ(qqq, vix);
+      const oRes = evaluateORCL(orcl, vix);
+
+      const resultEl = document.getElementById("result");
+      const summaryEl = document.getElementById("summary");
+      const qActionEl = document.getElementById("qqqAction");
+      const qReasonEl = document.getElementById("qqqReason");
+      const oActionEl = document.getElementById("orclAction");
+      const oReasonEl = document.getElementById("orclReason");
+
+      resultEl.style.display = "block";
+
+      const levelToClass = (level) => {
+        if (level === "strong") return "result-main q-strong";
+        if (level === "medium") return "result-main q-medium";
+        if (level === "light") return "result-main q-light";
+        return "result-main q-none";
+      };
+
+      qActionEl.className = levelToClass(qRes.level);
+      oActionEl.className = levelToClass(oRes.level);
+
+      qActionEl.textContent = qRes.action;
+      qReasonEl.textContent = qRes.reason;
+      oActionEl.textContent = oRes.action;
+      oReasonEl.textContent = oRes.reason;
+
+      let summary = "QQQ ≈ " + (isNaN(qqq) ? "—" : qqq.toFixed(1)) +
+        "，ORCL ≈ " + (isNaN(orcl) ? "—" : orcl.toFixed(1)) +
+        "，VIX ≈ " + (isNaN(vix) ? "—" : vix.toFixed(1)) + "。";
+
+      if (qRes.level === "strong" || oRes.level === "strong") {
+        summary += " 整体来看，今天可以视为你危机仓位布局中的「重点执行日」，" +
+          "但仍应按照既定资金比例分批入场，避免一次性梭哈。";
+      } else if (qRes.level === "medium" || oRes.level === "medium") {
+        summary += " 今天可以考虑执行部分计划（20–40% 仓位）的加仓动作，" +
+          "同时保留充足火力给更极端的价格与隐波组合。";
+      } else if (qRes.level === "light") {
+        summary += " 当前更适合小仓试探，而不是重仓表态，" +
+          "尤其要避免在恐慌日追空。";
+      } else {
+        summary += " 按当前组合，你的优势在于「不冲动」，等待双黄金区 + 低 VIX 的窗口再出手，是合理选择。";
+      }
+
+      summaryEl.textContent = summary;
+    }
+
+    function resetForm() {
+      document.getElementById("qqqPrice").value = "591.0";
+      document.getElementById("vix").value = "24.0";
+      document.getElementById("orclPrice").value = "118.0";
+      document.getElementById("result").style.display = "none";
+    }
+  </script>
+</body>
+</html>
+
